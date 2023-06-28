@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libui = { git = "https://github.com/tasuren/libui.git", version = "0.2.0" }
+libui = { git = "https://github.com/tasuren/libui.git" }
 native-windows-gui = "1.0.13"
