@@ -4,67 +4,71 @@
 use libui::{controls::*, prelude::*};
 use rand::Rng;
 
-const HAND_TYPES: [&str;3] = ["Rock", "Paper", "Scissors"];
+const HAND_TYPES: [&str;4] = ["グー", "パー", "チョキ", "グー"];
+const RESULT_TYPES: [&str;3] = ["勝ち", "負け", "あいこ"];
 
 
 fn main() {
-    let ui = UI::init()
-        .expect("Couldn't initialize UI library");
+    let ui = UI::init().expect("Couldn't initialize UI library");
 
-    let mut window = Window::new(&ui, "Rock Paper Scissors", 300, 100, 
-        WindowType::NoMenubar);
-
+    let mut window = Window::new(
+        &ui, "じゃんけん", 300, 100, WindowType::NoMenubar
+    );
 
     let mut layout = VerticalBox::new();
     let mut messages = VerticalBox::new();
     let mut buttons = HorizontalBox::new();
 
-    let mut player = "";
-    let mut cpu = "";
+    let mut rock_btn = Button::new("グー");
+    let mut paper_btn = Button::new("パー");
+    let mut scissors_btn = Button::new("チョキ");
 
-    let title_lbl = Label::new("Rock Paper Scissors");
-    let player_lbl = Label::new("");
-    let cpu_lbl = Label::new("");
-
-    let mut rock_btn = Button::new("Rock");
-    let mut paper_btn = Button::new("Paper");
-    let mut scissors_btn = Button::new("Scissors");
-
+    let player_lbl = Label::new("あなた:");
     let mut player_lbl_cln_1 = player_lbl.clone();
     let mut player_lbl_cln_2 = player_lbl.clone();
     let mut player_lbl_cln_3 = player_lbl.clone();
+
+    let cpu_lbl = Label::new("CPU:");
     let mut cpu_lbl_cln_1 = cpu_lbl.clone();
     let mut cpu_lbl_cln_2 = cpu_lbl.clone();
     let mut cpu_lbl_cln_3 = cpu_lbl.clone();
 
+    let result_lbl = Label::new("");
+    let mut result_lbl_cln_1 = result_lbl.clone();
+    let mut result_lbl_cln_2 = result_lbl.clone();
+    let mut result_lbl_cln_3 = result_lbl.clone();
 
-    rock_btn.on_clicked(move |rock_btn| {
-        player = HAND_TYPES[0];
-        cpu = HAND_TYPES[rnd()];
-        player_lbl_cln_1.set_text(player);
-        cpu_lbl_cln_1.set_text(cpu);
 
-    });
-    paper_btn.on_clicked(move |paper_btn| {
-        player = HAND_TYPES[1];
-        cpu = HAND_TYPES[rnd()];
-        player_lbl_cln_2.set_text(player);
-        cpu_lbl_cln_2.set_text(cpu);
-    });
-    scissors_btn.on_clicked(move |scissors_btn| {
-        player = HAND_TYPES[2];
-        cpu = HAND_TYPES[rnd()];
-        player_lbl_cln_3.set_text(player);
-        cpu_lbl_cln_3.set_text(cpu);
+    rock_btn.on_clicked(move |_rock_btn| {
+        let i = 0;
+        let j = rand_idx();
+        player_lbl_cln_1.set_text(&format!("{} {}", "あなた:", HAND_TYPES[i]));
+        cpu_lbl_cln_1.set_text(&format!("{} {}", "CPU:", HAND_TYPES[j]));
+        result_lbl_cln_1.set_text(result(i, j))
     });
 
+    paper_btn.on_clicked(move |_paper_btn| {
+        let i = 1;
+        let j = rand_idx();
+        player_lbl_cln_2.set_text(&format!("{} {}", "あなた:", HAND_TYPES[i]));
+        cpu_lbl_cln_2.set_text(&format!("{} {}", "CPU:", HAND_TYPES[j]));
+        result_lbl_cln_2.set_text(result(i, j))
+    });
 
-    for control in [title_lbl, player_lbl, cpu_lbl] {
-        messages.append(control, LayoutStrategy::Stretchy
-        );
-    }
+    scissors_btn.on_clicked(move |_scissors_btn| {
+        let i = 2;
+        let j = rand_idx();
+        player_lbl_cln_3.set_text(&format!("{} {}", "あなた:", HAND_TYPES[i]));
+        cpu_lbl_cln_3.set_text(&format!("{} {}", "CPU:", HAND_TYPES[j]));
+        result_lbl_cln_3.set_text(result(i, j))
+    });
+    
 
-    for child in [rock_btn, paper_btn, scissors_btn] {
+    for control in [player_lbl, cpu_lbl, result_lbl] {
+        messages.append(control, LayoutStrategy::Stretchy);
+    };
+
+    for child in [rock_btn, scissors_btn, paper_btn] {
         buttons.append(child, LayoutStrategy::Stretchy);
     };
 
@@ -76,9 +80,17 @@ fn main() {
     ui.main();
 }
 
-fn rnd() -> usize {
+fn rand_idx() -> usize {
     loop {
-        let tmp = (rand::thread_rng().gen::<f32>() * 3.).floor() as i8;
-        if tmp != 3 { break tmp as usize; };
+        let i = (rand::thread_rng().gen::<f32>() * 3.).floor();
+        if i != 3. {
+            break i as usize
+        };
     }
+}
+
+fn result(player_idx: usize, cpu_idx: usize) -> &'static str {
+    if HAND_TYPES[cpu_idx + 1] == HAND_TYPES[player_idx] { RESULT_TYPES[0] }
+    else if HAND_TYPES[player_idx + 1] == HAND_TYPES[cpu_idx] { RESULT_TYPES[1] }
+    else { RESULT_TYPES[2] }     
 }
