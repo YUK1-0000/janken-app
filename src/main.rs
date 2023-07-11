@@ -8,55 +8,6 @@ const HAND_TYPES: [&str;4] = ["グー", "パー", "チョキ", "グー"];
 const RESULT_TYPES: [&str;3] = ["勝ち", "負け", "あいこ"];
 
 
-struct Janken {
-    win: usize,
-    lose: usize
-}
-
-
-impl Janken {
-    fn new() -> Self {
-        Self { win: 0, lose: 0 }
-    }
-
-    fn rand_idx(&self) -> usize {
-        loop {
-            let i = (rand::thread_rng().gen::<f32>() * 3.).floor();
-            if i != 3. {
-                break i as usize
-            };
-        }
-    }
-
-    fn result(&mut self, player_idx: usize, cpu_idx: usize) -> &'static str {
-        if HAND_TYPES[cpu_idx + 1] == HAND_TYPES[player_idx] {
-            self.win += 1;
-            RESULT_TYPES[0]
-        }
-        else if HAND_TYPES[player_idx + 1] == HAND_TYPES[cpu_idx] {
-            self.lose += 1;
-            RESULT_TYPES[1]
-        }
-        else {
-            RESULT_TYPES[2]
-        }     
-    }
-
-    fn update(&mut self) -> (usize, &'static str) {
-        let j = self.rand_idx();
-        (j, self.result(0, j))
-    }
-}
-
-
-struct Labels {
-    player: Label,
-    cpu: Label,
-    result: Label,
-    count: Label
-}
-
-
 fn main() {
     let ui = UI::init().expect("Couldn't initialize UI library");
 
@@ -88,29 +39,28 @@ fn main() {
     let mut result_lbl_cln_3 = result_lbl.clone();
 
 
-    let janken = Janken::new();
-
     rock_btn.on_clicked(move |_rock_btn| {
-        let (j, result) = janken.update();
-        player_lbl_cln_1.set_text(&format!("{} {}", "あなた:", HAND_TYPES[0]));
+        let i = 0;
+        let j = rand_idx();
+        player_lbl_cln_1.set_text(&format!("{} {}", "あなた:", HAND_TYPES[i]));
         cpu_lbl_cln_1.set_text(&format!("{} {}", "CPU:", HAND_TYPES[j]));
-        result_lbl_cln_1.set_text(result)
+        result_lbl_cln_1.set_text(result(i, j))
     });
 
     paper_btn.on_clicked(move |_paper_btn| {
         let i = 1;
-        let j = janken.rand_idx();
+        let j = rand_idx();
         player_lbl_cln_2.set_text(&format!("{} {}", "あなた:", HAND_TYPES[i]));
         cpu_lbl_cln_2.set_text(&format!("{} {}", "CPU:", HAND_TYPES[j]));
-        result_lbl_cln_2.set_text(janken.result(i, j))
+        result_lbl_cln_2.set_text(result(i, j))
     });
 
     scissors_btn.on_clicked(move |_scissors_btn| {
         let i = 2;
-        let j = janken.rand_idx();
+        let j = rand_idx();
         player_lbl_cln_3.set_text(&format!("{} {}", "あなた:", HAND_TYPES[i]));
         cpu_lbl_cln_3.set_text(&format!("{} {}", "CPU:", HAND_TYPES[j]));
-        result_lbl_cln_3.set_text(janken.result(i, j))
+        result_lbl_cln_3.set_text(result(i, j))
     });
     
 
@@ -130,10 +80,17 @@ fn main() {
     ui.main();
 }
 
-fn update_lbl(core: &mut Janken, labels: &mut Labels) {
-    let (j, result) = core.update();
-    labels.player.set_text(&format!("{} {}", "あなた:", HAND_TYPES[0]));
-    labels.cpu.set_text(&format!("{} {}", "CPU:", HAND_TYPES[j]));
-    labels.result.set_text(result)
-    
+fn rand_idx() -> usize {
+    loop {
+        let i = (rand::thread_rng().gen::<f32>() * 3.).floor();
+        if i != 3. {
+            break i as usize
+        };
+    }
+}
+
+fn result(player_idx: usize, cpu_idx: usize) -> &'static str {
+    if HAND_TYPES[cpu_idx + 1] == HAND_TYPES[player_idx] { RESULT_TYPES[0] }
+    else if HAND_TYPES[player_idx + 1] == HAND_TYPES[cpu_idx] { RESULT_TYPES[1] }
+    else { RESULT_TYPES[2] }     
 }
